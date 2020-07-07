@@ -4,12 +4,8 @@ const PORT = 8080;
 const bodyParser = require("body-parser");
 
 function generateRandomString() {
-  let randomString;
-  for (let i = 1; i <= 6; i++) {
-    let r = Math.random().toString(36).substring(7)
-    randomString += r;
-  }
-  return randomString;
+  let r = Math.random().toString(36).substring(7)
+  return r;
 };
 
 const urlDatabase = {
@@ -48,6 +44,18 @@ app.get("/urls/:shortURL", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  console.log(req.body);  // Log the POST request body to the console
-  res.send("Ok");         // Respond with 'Ok' (we will replace this)
+  console.log(req.body);
+  let longURL = req.body.longURL;
+  //res.send("Ok");
+  // generate random short URL (good)
+  let shortURL = generateRandomString();
+  // add the short URL - long URL key value pair to URL database
+  // respond with a redirect to /url/short-url 
+  urlDatabase[shortURL] = longURL
+  res.redirect(`/urls/${shortURL}`);
+});
+
+app.get("/u/:shortURL", (req, res) => {
+  const longURL = urlDatabase[req.params.shortURL];
+  res.redirect(longURL);
 });
