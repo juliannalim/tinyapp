@@ -34,6 +34,7 @@ app.listen(PORT, () => {
 
 app.get("/urls", (req, res) => {
   let templateVars = {
+    user: null,
     urls: urlDatabase,
     username: req.cookies["username"]
   };
@@ -43,6 +44,7 @@ app.get("/urls", (req, res) => {
 
 app.get("/urls/new", (req, res) => {
   let templateVars = {
+    user: null,
     urls: urlDatabase,
     username: req.cookies["username"]
   };
@@ -51,6 +53,7 @@ app.get("/urls/new", (req, res) => {
 
 app.get("/urls/:shortURL", (req, res) => {
   let templateVars = {
+    user: null,
     username: req.cookies["username"],
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL]
@@ -103,3 +106,16 @@ app.post("/logout", (req, res) => {
   res.redirect('/urls')
 });
 
+// Display the register form to the user
+app.get('/register', (req, res) => {
+  const templateVars = { user: null };
+  res.render('register', templateVars);
+});
+
+// Catch the submit of the register form
+app.post('/register', (req, res) => {
+  // Extract the user info from the form
+  const name = req.body.name;
+  const email = req.body.email;
+  const password = req.body.password;
+});
