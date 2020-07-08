@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const PORT = 8080;
 const bodyParser = require("body-parser");
+const cookieParser = require('cookie-parser');
 
 function generateRandomString() {
   let r = Math.random().toString(36).substring(7)
@@ -66,9 +67,19 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   res.redirect('/urls/');
 });
 
+//TODO: need to fix currently adding not replacing 
 app.post("/urls/:shortURL", (req, res) => {
-  // let longURL = req.body.longURL;
-  // const shortURL = req.params.shortURL;
-  // urlDatabase[shortURL] = longURL
-  res.redirect(`${urlDatabase[req.params.shortURL]}`);
+  let longURL = req.body.longURL;
+  const shortURL = req.params.shortURL;
+  urlDatabase[shortURL] = longURL
+  res.redirect(`/urls`);
+});
+
+// app.get("/login", (req, res) => {
+//   res.cookie(`/urls`);
+// });
+
+app.post("/login", (req, res) => {
+  res.cookie('username', req.body.username);
+  res.redirect('/urls')
 });
