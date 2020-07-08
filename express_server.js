@@ -30,6 +30,24 @@ const users = {
   }
 }
 
+// const registrationCheck = (email, password) => {
+
+//   if (email === '') {
+//     return res.status(400);
+//   }
+//   if (password === '') {
+//     return res.status(400);
+//   }
+
+//   for (let username in users) {
+//     if (users[username].email === email) {
+//       return res.status(400);
+//     }
+//   }
+//   return 0;
+// };
+
+
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.set("view engine", "ejs");
@@ -129,15 +147,16 @@ app.post('/register', (req, res) => {
   const name = req.body.name;
   const email = req.body.email;
   const password = req.body.password;
+  //registrationCheck(email, password);
   if (email === '') {
-    return res.status(400);
+    return res.status(400).send('Username name is blank.');
   }
   if (password === '') {
-    return res.status(400);
+    return res.status(400).send('password name is blank.');
   }
   for (let username in users) {
     if (users[username].email === email)
-      return res.status(400);
+      return res.status(400).send('email already exist.');
   }
   users[name] = {
     name: name,
