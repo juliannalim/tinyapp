@@ -129,6 +129,16 @@ app.post('/register', (req, res) => {
   const name = req.body.name;
   const email = req.body.email;
   const password = req.body.password;
+  if (email === '') {
+    return res.status(400);
+  }
+  if (password === '') {
+    return res.status(400);
+  }
+  for (let username in users) {
+    if (users[username].email === email)
+      return res.status(400);
+  }
   users[name] = {
     name: name,
     email: email,
@@ -137,3 +147,5 @@ app.post('/register', (req, res) => {
   res.cookie('user_id', users[name]);
   res.redirect('/urls')
 });
+
+//to do something needs to recieve the 400 
