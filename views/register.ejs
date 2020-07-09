@@ -17,31 +17,21 @@
   <body>
     <div class="container">
 
-      <h1>Register</h1>
+      <h1>Register New Account</h1>
 
-      <form method="post" action="/register">
+      <form method="POST" action="/register">
         <div style="width: 20em;">
           <div class="form-group">
-            <label for="name">Name:</label>
-            <input style="width: 100%" type="text" name="name" id="name" placeholder="Please enter your name">
-          </div>
-          <div class="form-group">
             <label for="email">Email:</label>
-            <input style="width: 100%" type="text" name="email" id="email" placeholder="Please enter your email">
+            <input style="width: 100%" type="text" name="email" id="email" placeholder="Enter your email">
           </div>
           <div class="form-group">
             <label for="password">Password:</label>
-            <input style="width: 100%" type="password" name="password" id="password"
-              placeholder="Please enter your password">
-
+            <input style="width: 100%" type="password" name="password" id="password" placeholder="Enter your password">
           </div>
-
-          <input type="submit" class="btn btn-primary" value="Register" />
         </div>
+        <button type="submit" class="btn btn-primary"> Register </button>
       </form>
-
-    </div>
-  </body>
 </main>
 < <!-- Bootstrap JS -->
   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"

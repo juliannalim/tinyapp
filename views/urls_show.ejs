@@ -10,6 +10,7 @@
 <%- include('partials/_header') %>
 
 <body>
+  <% if( userCheckOne === userCheckTwo ){ %>
   <div class="card text-center">
     <div class="card-header"></div>
     <div class="card-body">
@@ -25,6 +26,11 @@
         </form>
       </div>
     </div>
+    <% } else if (!longURL) { %>
+    <h3>This short URL does not exist</h3>
+    <% } else { %>
+    <h3>This short URL can only be edited by it's creator</h3>
+    <% } %>
     <!-- Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
       integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
