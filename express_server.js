@@ -30,24 +30,6 @@ const users = {
   }
 }
 
-// const registrationCheck = (email, password) => {
-
-//   if (email === '') {
-//     return res.status(400);
-//   }
-//   if (password === '') {
-//     return res.status(400);
-//   }
-
-//   for (let username in users) {
-//     if (users[username].email === email) {
-//       return res.status(400);
-//     }
-//   }
-//   return 0;
-// };
-
-
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.set("view engine", "ejs");
@@ -125,10 +107,6 @@ app.post("/urls/:shortURL", (req, res) => {
 //   res.cookie(`/urls`);
 // });
 
-app.post("/login", (req, res) => {
-  res.cookie('username', req.body.username);
-  res.redirect('/urls')
-});
 
 app.post("/logout", (req, res) => {
   res.clearCookie('user_id');
@@ -167,4 +145,32 @@ app.post('/register', (req, res) => {
   res.redirect('/urls')
 });
 
-//to do something needs to recieve the 400 
+app.get("/login", (req, res) => {
+  let templateVars = { user_id: req.cookies['user_id'] };
+  res.render("login", templateVars);
+});
+
+app.post("/logout", (req, res) => {
+  res.clearCookie('user_id');
+  res.redirect('/urls');
+});
+
+app.post("/login", (req, res) => {
+  if (req.body.email !== req.body.email) {
+    return res.status(400).send('Username name is blank.');
+  }
+  if (req.body.password !== req.body.password) {
+    return res.status(400).send('password name is blank.');
+  }
+  for (let user in users) {
+    if (users[user].email === req.body.email) {
+      if (users[user].password === req.body.password) {
+        res.cookie('user_id', users[name].id);
+        res.redirect(`/urls`);
+      } else {
+        return res.status(403).send('The inputted password for this email is incorrect.');
+      }
+    }
+  }
+  res.status(403).send('The inputted password for this email is incorrect.')
+});
