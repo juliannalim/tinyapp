@@ -12,6 +12,11 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+
+function generateRandomString() {
+  return Math.random().toString(36).substring(7);
+}
+
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
@@ -35,14 +40,18 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
-app.post("/urls", (req, res) => {
-  console.log(req.body);  // Log the POST request body to the console
-  res.send("Ok");         // Respond with 'Ok' (we will replace this)
-});
 
 // NEW URL //
 app.get("/urls/new", (req, res) => {
   res.render("urls_new");
+});
+
+app.post("/urls", (req, res) => {
+  let shortURL = generateRandomString();
+  // console.log(req.body);
+  longURLString = req.body.longURL;
+  urlDatabase[shortURL] = longURLString;
+  res.redirect(`/urls/${shortURL}`);
 });
 
 
@@ -52,7 +61,9 @@ app.get("/urls/:shortURL", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
+// REDIRECT TO LONG URL //
 
-function generateRandomString() {
-  return Math.random().toString(36).substring(7);
-}
+app.get("/u/:shortURL", (req, res) => {
+  const longURL = urlDatabase[req.params.shortURL];
+  res.redirect(longURL);
+});
