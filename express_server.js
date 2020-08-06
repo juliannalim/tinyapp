@@ -4,6 +4,8 @@ const cookieSession = require('cookie-session');
 const bcrypt = require('bcrypt');
 const PORT = 8080;
 const bodyParser = require("body-parser");
+const { urlDatabase, users, authenticateUser, getUserByEmail, urlsForUser } = require('./helper');
+
 let saltRounds = 10;
 
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -14,61 +16,6 @@ app.use(cookieSession({
   keys: ['my-s5cr5t-k5y-1s-that-1m-apotato', '1m-also-a-marshm5llow']
 }));
 
-const urlDatabase = {
-  "b2xVn2": {
-    longURL: "http://www.lighthouselabs.ca", userID: "aJ48lW"
-  },
-  "9sm5xK": {
-    longURL: "http://www.google.com", userID: "aJ48lW"
-  }
-};
-
-const users = {
-  "userRandomID": {
-    id: "userRandomID",
-    email: "user@example.com",
-    password: "purple-monkey-dinosaur"
-  },
-
-  "user2RandomID": {
-    id: "user2RandomID",
-    email: "user2@example.com",
-    password: "purple-monkey-dinosaur"
-  }
-};
-
-const findUserByEmail = (email, database) => {
-  for (let userid in database) {
-    if (database[userid].email === email) {
-      return database[userid];
-    }
-  }
-  return undefined;
-}
-
-const authenticateUser = (email, password) => {
-  // retrieve the user with that email
-  const user = findUserByEmail(email, users);
-
-  // if we got a user back and the passwords match then return the userObj
-  if (user && bcrypt.compareSync(password, user.password)) {
-    // user is authenticated
-    return user;
-  } else {
-    // Otherwise return false
-    return false;
-  }
-};
-
-const urlsForUser = (id) => {
-  const result = {};
-  for (let shortURL in urlDatabase) {
-    if (urlDatabase[shortURL] && urlDatabase[shortURL].userID === id) {
-      result[shortURL] = urlDatabase[shortURL];
-    }
-  }
-  return result;
-}
 
 function generateRandomString() {
   return Math.random().toString(36).substring(7);
@@ -90,16 +37,16 @@ app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
 
-///////////////////////////
-// URL PAGE //
-///////////////////////////
+////////////////////////////
+//////// URL PAGE /////////
+//////////////////////////
 
 app.get("/urls", (req, res) => {
   const userID = req.session.user_id;
-  const urls = urlsForUser(userID);
+  // const urls = urlsForUser(userID);
 
   const templateVars = {
-    urls: urlDatabase,
+    // urls: urlDatabase,
     user: users[req.session['user_id']],
     urls: urlsForUser(req.session.user_id)
   };
@@ -108,20 +55,18 @@ app.get("/urls", (req, res) => {
 
 app.post("/urls", (req, res) => {
   let shortURL = generateRandomString();
-  // console.log(req.body);
-  longURLString = req.body.longURL;
+  let longURLString = req.body.longURL;
   urlDatabase[shortURL] = { longURL: longURLString, userID: req.session['user_id'] };
   res.redirect(`/urls/${shortURL}`);
 });
 
 ///////////////////////////
-// NEW URL //
-///////////////////////////
+/////// NEW URL //////////
+/////////////////////////
 
 app.get("/urls/new", (req, res) => {
   if (!req.session.user_id) {
-    res.redirect('/login');
-    return;
+    return res.redirect('/login');
   }
   const templateVars = {
     urls: urlDatabase,
@@ -130,9 +75,9 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new", templateVars);
 });
 
-///////////////////////////
-// SHORT URL //
-///////////////////////////
+////////////////////////////
+//////// SHORT URL ////////
+//////////////////////////
 
 app.get("/urls/:shortURL", (req, res) => {
   let templateVars = {
@@ -146,10 +91,10 @@ app.get("/urls/:shortURL", (req, res) => {
 app.post("/urls/:shortURL", (req, res) => {
   // extract the value of shortURL
   const shortURL = req.params.shortURL;
-  // extract the value from the form 
+  // extract the value from the form
   const longURL = req.body.longURL;
-  // gives the long URL 
-  // update the longURL in url database 
+  // gives the long URL
+  // update the longURL in url database
   urlDatabase[shortURL].longURL = longURL;
   // redirect /urls/shortURL
   if (req.session.user_id === urlDatabase[req.params.shortURL].userID) {
@@ -160,7 +105,7 @@ app.post("/urls/:shortURL", (req, res) => {
 
 ///////////////////////////
 // REDIRECT TO LONG URL //
-///////////////////////////
+/////////////////////////
 
 app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL].longURL;
@@ -168,9 +113,9 @@ app.get("/u/:shortURL", (req, res) => {
 });
 
 
-///////////////////////////
+////////////////////////////
 // REDIRECT WHEN DELETED //
-///////////////////////////
+//////////////////////////
 
 app.post("/urls/:shortURL/delete", (req, res) => {
   delete urlDatabase[req.params.shortURL];
@@ -178,14 +123,12 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 });
 
 ///////////////////////////
-// LOGIN //
-///////////////////////////
+///////// LOGIN //////////
+/////////////////////////
 
 app.post("/login", (req, res) => {
-  // const username = req.body.username;
-
   const email = req.body.email;
-  const password = req.body.password;// found in the req.params object
+  const password = req.body.password;
 
   if (!email) {
     res.status(403).send('E-mail is empty');
@@ -201,28 +144,27 @@ app.post("/login", (req, res) => {
   } else {
     res.status(403).send('The inputted password or email is incorrect.');
   }
-
 });
 
 app.get("/login", (req, res) => {
   let templateVars = {
     user: users[req.session['user_id']]
-  }
+  };
   res.render("login", templateVars);
 });
 
-///////////////////////////
-// LOGOUT //
-///////////////////////////
+////////////////////////////
+///////// LOGOUT //////////
+//////////////////////////
 
 app.post("/logout", (req, res) => {
   req.session = null;
   res.redirect("/urls");
 });
 
-///////////////////////////
-// REGISTER//
-///////////////////////////
+////////////////////////////
+///////// REGISTER/////////
+//////////////////////////
 
 app.get('/register', (req, res) => {
   const templateVars = {
@@ -237,8 +179,6 @@ app.post('/register', (req, res) => {
   const id = generateRandomString();
 
   // check if the user is not already in the database
-
-  // const user = findUserByEmail(email);
 
   if (password === '' || email === '') {
     return res.status(400).send('Password or Email Is Blank!');
