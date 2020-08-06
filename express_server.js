@@ -37,10 +37,10 @@ const users = {
   }
 };
 
-const findUserByEmail = (email) => {
-  for (let id in users) {
-    if (email === users[id].email) {
-      return users[id];
+const findUserByEmail = (email, database) => {
+  for (let userid in database) {
+    if (database[userid].email === email) {
+      return database[userid];
     }
   }
   return undefined;
@@ -48,7 +48,7 @@ const findUserByEmail = (email) => {
 
 const authenticateUser = (email, password) => {
   // retrieve the user with that email
-  const user = findUserByEmail(email);
+  const user = findUserByEmail(email, users);
 
   // if we got a user back and the passwords match then return the userObj
   if (user && bcrypt.compareSync(password, user.password)) {
@@ -186,7 +186,6 @@ app.post("/login", (req, res) => {
 
   const email = req.body.email;
   const password = req.body.password;// found in the req.params object
-  // const user = findUser(email);
 
   if (!email) {
     res.status(403).send('E-mail is empty');
@@ -195,10 +194,10 @@ app.post("/login", (req, res) => {
   // Authenticate the user
   const user = authenticateUser(email, password);
 
+
   if (user) {
     req.session['user_id'] = user.id;
     res.redirect('/urls');
-    console.log(user.password);
   } else {
     res.status(403).send('The inputted password or email is incorrect.');
   }
