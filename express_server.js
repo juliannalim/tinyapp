@@ -22,7 +22,9 @@ function generateRandomString() {
 }
 
 app.get("/", (req, res) => {
-  res.send("Hello!");
+  if (!req.session.user_id) {
+    return res.redirect('/login');
+  }
 });
 
 app.listen(PORT, () => {
@@ -42,11 +44,14 @@ app.get("/hello", (req, res) => {
 //////////////////////////
 
 app.get("/urls", (req, res) => {
+  if (!req.session.user_id) {
+    return res.status(403).send('<h1>SIGN IN YOU POTATO OR REGISTER!</h1>');
+  }
+
   const userID = req.session.user_id;
   // const urls = urlsForUser(userID);
 
   const templateVars = {
-    // urls: urlDatabase,
     user: users[req.session['user_id']],
     urls: urlsForUser(req.session.user_id)
   };
@@ -80,6 +85,10 @@ app.get("/urls/new", (req, res) => {
 //////////////////////////
 
 app.get("/urls/:shortURL", (req, res) => {
+  if (!req.session.user_id) {
+    return res.status(403).send('<h1>SIGN IN YOU POTATO OR REGISTER!</h1>');
+  }
+
   let templateVars = {
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL].longURL,
@@ -96,7 +105,6 @@ app.post("/urls/:shortURL", (req, res) => {
   // gives the long URL
   // update the longURL in url database
   urlDatabase[shortURL].longURL = longURL;
-  // redirect /urls/shortURL
   if (req.session.user_id === urlDatabase[req.params.shortURL].userID) {
     urlDatabase[req.params.shortURL].longURL = req.body.longURL;
   }
@@ -108,8 +116,11 @@ app.post("/urls/:shortURL", (req, res) => {
 /////////////////////////
 
 app.get("/u/:shortURL", (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL].longURL;
-  res.redirect(longURL);
+  if (urlDatabase[req.params.shortURL]) {
+    const longURL = urlDatabase[req.params.shortURL].longURL;
+    res.redirect(longURL);
+  }
+  res.status(400).send('This short URL does not exist');
 });
 
 
@@ -130,14 +141,11 @@ app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
 
-  if (!email) {
-    res.status(403).send('E-mail is empty');
-  }
-
   // Authenticate the user
   const user = authenticateUser(email, password);
 
-
+  // if user exist brings you to url page 
+  // if it does not exist returns error message
   if (user) {
     req.session['user_id'] = user.id;
     res.redirect('/urls');
@@ -158,6 +166,7 @@ app.get("/login", (req, res) => {
 //////////////////////////
 
 app.post("/logout", (req, res) => {
+  // deletes all the cookies
   req.session = null;
   res.redirect("/urls");
 });
@@ -178,12 +187,11 @@ app.post('/register', (req, res) => {
   const password = req.body.password;// found in the req.params object
   const id = generateRandomString();
 
-  // check if the user is not already in the database
-
-  if (password === '' || email === '') {
+  // if password or email is blank, will return message
+  if (password === ' ' || email === ' ') {
     return res.status(400).send('Password or Email Is Blank!');
   }
-
+  // checking if the user already exists
   for (let user in users) {
     if (users[user].email === email) {
       return res.status(400).send('Email already exist.');
