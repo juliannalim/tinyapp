@@ -44,10 +44,13 @@ app.get("/hello", (req, res) => {
 //////////////////////////
 
 app.get("/urls", (req, res) => {
-  if (!req.session.user_id) {
-    return res.status(403).send('<h1>SIGN IN YOU POTATO OR REGISTER!</h1>');
+  if (req.session.user_id === urlDatabase[req.params.shortURL].userID) {
+    res.send("<p>You don't own this url!</p>");
   }
 
+  else if (!req.session.user_id) {
+    return res.status(403).send('<h1>SIGN IN YOU POTATO OR REGISTER!</h1>');
+  }
   const userID = req.session.user_id;
   // const urls = urlsForUser(userID);
 
