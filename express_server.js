@@ -27,10 +27,6 @@ app.get("/", (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
-});
-
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
@@ -44,14 +40,10 @@ app.get("/hello", (req, res) => {
 //////////////////////////
 
 app.get("/urls", (req, res) => {
-  if (req.session.user_id === urlDatabase[req.params.shortURL].userID) {
-    res.send("<p>You don't own this url!</p>");
-  }
-
-  else if (!req.session.user_id) {
+  if (!req.session.user_id) {
     return res.status(403).send('<h1>SIGN IN YOU POTATO OR REGISTER!</h1>');
   }
-  const userID = req.session.user_id;
+  const userID = req.session['user_id'];
   // const urls = urlsForUser(userID);
 
   const templateVars = {
@@ -88,7 +80,11 @@ app.get("/urls/new", (req, res) => {
 //////////////////////////
 
 app.get("/urls/:shortURL", (req, res) => {
-  if (!req.session.user_id) {
+  if (!urlDatabase[req.params.shortURL]) {
+    return res.send("<p>Does Not Exist</p>")
+  } else if (req.session.user_id !== urlDatabase[req.params.shortURL].userID) {
+    return res.send("<p>You Don't Own This URL!</p>");
+  } else if (!req.session.user_id) {
     return res.status(403).send('<h1>SIGN IN YOU POTATO OR REGISTER!</h1>');
   }
 
@@ -209,4 +205,8 @@ app.post('/register', (req, res) => {
 
   req.session['user_id'] = id;
   res.redirect("/urls");
+});
+
+app.listen(PORT, () => {
+  console.log(`Example app listening on port ${PORT}!`);
 });
