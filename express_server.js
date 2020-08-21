@@ -40,15 +40,12 @@ app.get("/hello", (req, res) => {
 //////////////////////////
 
 app.get("/urls", (req, res) => {
-  if (!req.session.user_id) {
-    return res.status(403).send('<h1>SIGN IN YOU POTATO OR REGISTER!</h1>');
-  }
   const userID = req.session['user_id'];
-  // const urls = urlsForUser(userID);
 
   const templateVars = {
-    user: users[req.session['user_id']],
-    urls: urlsForUser(req.session.user_id)
+    user: users[userID],
+    urls: urlsForUser(userID, urlDatabase),
+    // error: req.session['user_id'] ? "" : "Log in to see your URLs."
   };
   res.render("urls_index", templateVars);
 });
